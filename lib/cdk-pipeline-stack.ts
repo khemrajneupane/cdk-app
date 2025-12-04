@@ -18,14 +18,12 @@ export class CdkPipelineStack extends cdk.Stack {
     /**
      * 2. Define pipeline
      */
-    const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
-      pipelineName: "MyCDKPipeline",
-      crossAccountKeys: false, // OK for single-account testing
-
+    const modernPipeline = new pipelines.CodePipeline(this, "Pipeline", {
+      selfMutation: false,
       synth: new pipelines.ShellStep("Synth", {
         input: pipelines.CodePipelineSource.connection(
-          "khemrajneupane/cdk-app", // repo
-          "main", // branch
+          "khemrajneupane/cdk-pipeline",
+          "main",
           {
             connectionArn: connectionArn,
           }
@@ -37,6 +35,6 @@ export class CdkPipelineStack extends cdk.Stack {
     /**
      * 3. Add a deployment stage
      */
-    pipeline.addStage(new CdkPipelineStackResource(this, "DevStage"));
+    modernPipeline.addStage(new CdkPipelineStackResource(this, "DevStage"));
   }
 }
