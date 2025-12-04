@@ -2,7 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 
-export class CdkPipelineStackResource extends cdk.Stage {
+export class CdkPipelineStackResource extends cdk.Stack {
   public readonly urlOutput: cdk.CfnOutput;
 
   constructor(scope: Construct, id: string, props?: cdk.StageProps) {
