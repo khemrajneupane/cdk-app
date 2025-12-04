@@ -22,7 +22,7 @@ export class CdkPipelineStack extends cdk.Stack {
       selfMutation: false,
       synth: new pipelines.ShellStep("Synth", {
         input: pipelines.CodePipelineSource.connection(
-          "khemrajneupane/cdk-pipeline",
+          "khemrajneupane/cdk-app",
           "main",
           {
             connectionArn: connectionArn,
