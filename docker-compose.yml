@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  localstack:
+    image: localstack/localstack:2.2
+    container_name: "localstack-main"
+    ports:
+      - "4566:4566" # LocalStack edge port (all services go through this)
+      - "4571:4571" # Optional legacy ports
+      - "8080:8080"
+      #- "4510-4559:4510-4559" # For S3 virtual hosting
+    environment:
+      - SERVICES=lambda,dynamodb,apigateway,s3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - LAMBDA_PREBUILD_IMAGES=0 # Disable prebuilt images
+      - LAMBDA_RUNTIME_IMAGE_MAPPING=nodejs18.x=public.ecr.aws/lambda/nodejs:18
+
+      # For S3 static website hosting
+      - DISABLE_CORS_CHECKS=1
+      - DISABLE_CUSTOM_CORS_S3=1
+
+    volumes:
+      - "./localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"

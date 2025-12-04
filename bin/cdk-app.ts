@@ -1,20 +1,61 @@
 #!/usr/bin/env node
-import * as cdk from 'aws-cdk-lib/core';
-import { CdkAppStack } from '../lib/cdk-app-stack';
+import * as cdk from "aws-cdk-lib/core";
+import { CdkAppStack } from "../lib/cdk-app-stack";
+import { CdkAppWebsiteS3Stack } from "../lib/cdk-app-website-s3";
+import { CdkCrossStackReferenceS3 } from "../lib/cdk-cross-stack-reference-s3";
+import { CdkCrossStackLambda } from "../lib/cdk-cross-stack-lambda";
+import { S3TriggerStack } from "../lib/s3-trigger-stack";
+import { CDKApiStack } from "../lib/cdk-api-stack";
+import { CdkSqsFanoutStack } from "../lib/cdk-sqs-fanout-stack";
+import { CdkStepFunctionStack } from "../lib/cdk-step-function-stack";
+import { CdkStepFnRestApiDynamoStack } from "../lib/cdk-step-fn-restapi-dynamodb";
+import { CdkVpcEc2BastionStack } from "../lib/cdk-vpc-ec2-bastian-stack";
+import { CdkIAMgroupPolicyAccessS3 } from "../lib/cdk-IAM-group-policy-access-s3";
+import { CdkPipelineStack } from "../lib/cdk-pipeline-stack";
 
 const app = new cdk.App();
-new CdkAppStack(app, 'CdkAppStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
+new CdkAppStack(app, "CdkAppStack");
+new CdkAppWebsiteS3Stack(app, "CdkAppWebsiteS3Stack");
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const websiteStack = new CdkCrossStackReferenceS3(
+  app,
+  "CdkCrossStackReferenceS3"
+);
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
-
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+// 2️⃣ Lambda stack that writes to S3
+new CdkCrossStackLambda(app, "CdkCrossStackLambda", {
+  targetBucket: websiteStack.websiteBucket,
 });
+// lambda stack that is triggered by s3 event.
+new S3TriggerStack(app, "S3TriggerStack");
+// API CRUD stack...
+new CDKApiStack(app, "CDKApiStack");
+// sqs fanout stack to demonstrate sqs with lambda
+new CdkSqsFanoutStack(app, "CdkSqsFanoutStack");
+
+//orchestration with step functions
+// AWS Console → Step Functions → MyStateMachine → Start Execution
+new CdkStepFunctionStack(app, "CdkStepFunctionStack");
+
+// Production-style microservice stack with step functions, api gateway, dynamodb, sns, sqs, etc.
+new CdkStepFnRestApiDynamoStack(app, "CdkStepFnRestApiDynamoStack");
+
+// VPC with EC2 Bastian Host complete infrastructure design.
+// first ssh into bastian host ( public subnet ec2 instance) like so:
+//ssh -i "bastion-key-pair.pem" ec2-user@ec2-13-53-216-18.eu-north-1.compute.amazonaws.com
+//Then from bastian host in order to ssh into private instance ec2, we need to do the following things:
+// create a file to hold the private key- touch bastian-key-pair, then paste the private key contents into this file from your local machine where you have saved it:
+// vi bastian-key-pair- then paste the entire private key from -----BEGIN RSA PRIVATE KEY----- to end rsa private key---
+// :wq to save and exit vi editor
+// then do chomod 400 bastian-key-pari
+// then ssh -i "bastian-key-pari" ec2-user@<private-ec2-instance-private-ip>
+
+new CdkVpcEc2BastionStack(app, "CdkVpcEc2BastionStack");
+
+// developer-group's users have full access to S3
+
+// Tester group users can only list buckets but not red contents inside buckets..
+new CdkIAMgroupPolicyAccessS3(app, "CdkIAMgroupPolicyAccessS3");
+
+// CDK pipeline stack
+new CdkPipelineStack(app, "CdkPipelineStack");
