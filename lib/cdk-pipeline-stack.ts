@@ -1,7 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as pipelines from "aws-cdk-lib/pipelines";
-import { CdkPipelineStackResource } from "./cdk-pipeline-stack-resource";
+import { CdkPipelineStage } from "./cdk-pipeline-stage";
 
 export class CdkPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -35,6 +35,6 @@ export class CdkPipelineStack extends cdk.Stack {
     /**
      * 3. Add a deployment stage
      */
-    modernPipeline.addStage(new CdkPipelineStackResource(this, "DevStage"));
+    modernPipeline.addStage(new CdkPipelineStage(this, "DevStage"));
   }
 }
