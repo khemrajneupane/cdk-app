@@ -12,6 +12,7 @@ import { CdkStepFnRestApiDynamoStack } from "../lib/cdk-step-fn-restapi-dynamodb
 import { CdkVpcEc2BastionStack } from "../lib/cdk-vpc-ec2-bastian-stack";
 import { CdkIAMgroupPolicyAccessS3 } from "../lib/cdk-IAM-group-policy-access-s3";
 import { CdkPipelineStack } from "../lib/cdk-pipeline-stack";
+import { CdkFargateDockerEcsAlb } from "../lib/cdk-fargate-docker-ecs-alb";
 
 const app = new cdk.App();
 new CdkAppStack(app, "CdkAppStack");
@@ -59,3 +60,20 @@ new CdkIAMgroupPolicyAccessS3(app, "CdkIAMgroupPolicyAccessS3");
 
 // CDK pipeline stack
 new CdkPipelineStack(app, "CdkPipelineStack");
+
+//Deploys a simple “Hello World” Node.js web application using a Docker image to
+// AWS ECS Fargate. The stack is optimized for cost with no NAT gateways
+// and minimal public subnet configuration. Demonstrates containerized
+// deployment, serverless compute with ECS, and exposing the service through
+// an Application Load Balancer (ALB) for HTTP access.
+// Resources: VPC (public subnet), ECS Cluster, Fargate Service, Fargate Task,
+// Docker image asset, Application Load Balancer (ALB)
+// find the LoadBalancerURL from output or in loadbalancer console in aws and curl response should give you "Hello from ECS Fargate Docker Image!"
+// or test it by pulling the ECR image locally and running it like following:
+//Pulling from cdk-hnb659fss-container-assets-my-account-id-eu-north-1 -t my-docker-ect-task
+// Then run it
+//docker run -p 3000:3000 my-docker-ecs-task
+// docker-for-ecs-tasks@1.0.0 start
+//node server.js
+//Server running on port 3000
+new CdkFargateDockerEcsAlb(app, "CdkFargateDockerEcsAlb");
