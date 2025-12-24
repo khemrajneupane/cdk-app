@@ -1,18 +1,13 @@
-// /lib/cdk-app-stack.ts
+// cdk-api-gateway-stack.ts
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
-import * as s3 from "aws-cdk-lib/aws-s3";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as iam from "aws-cdk-lib/aws-iam";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
-import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
-
-import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
+import * as cdk from "aws-cdk-lib";
 import * as path from "path";
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
 
-export class CdkAppStack extends cdk.Stack {
+export class CdkApiGatewayStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -34,9 +29,6 @@ export class CdkAppStack extends cdk.Stack {
       },
       bundling: {
         minify: true,
-        //externalModules: ["aws-sdk"],
-        externalModules: [],
-        //forceDockerBundling: false,
       },
     });
 
@@ -50,8 +42,6 @@ export class CdkAppStack extends cdk.Stack {
       },
       bundling: {
         minify: true,
-        externalModules: [],
-        // externalModules: ["aws-sdk"],
       },
     });
 
@@ -62,7 +52,7 @@ export class CdkAppStack extends cdk.Stack {
     const api = new apigw.RestApi(this, "MyTodoApi", {
       defaultCorsPreflightOptions: {
         allowOrigins: apigw.Cors.ALL_ORIGINS,
-        allowMethods: ["OPTIONS", "GET", "POST", "DELETE"], // this is also the default
+        allowMethods: ["OPTIONS", "GET", "POST", "DELETE"],
       },
       deployOptions: { stageName: "dev" }, // explicitly set stage
     });

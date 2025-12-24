@@ -22,7 +22,7 @@ export async function postToDo(
       body: JSON.stringify({ error: "Request body is required" }),
     };
   }
-
+  console.log("Incoming event:", JSON.stringify(event, null, 2));
   const bodyInputs = JSON.parse(event.body);
   const id = uuidv4();
 

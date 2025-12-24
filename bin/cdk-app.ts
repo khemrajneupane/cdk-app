@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as cdk from "aws-cdk-lib/core";
-import { CdkAppStack } from "../lib/cdk-app-stack";
+
 import { CdkAppWebsiteS3Stack } from "../lib/cdk-app-website-s3";
 import { CdkCrossStackReferenceS3 } from "../lib/cdk-cross-stack-reference-s3";
 import { CdkCrossStackLambda } from "../lib/cdk-cross-stack-lambda";
@@ -13,9 +13,11 @@ import { CdkVpcEc2BastionStack } from "../lib/cdk-vpc-ec2-bastian-stack";
 import { CdkIAMgroupPolicyAccessS3 } from "../lib/cdk-IAM-group-policy-access-s3";
 import { CdkPipelineStack } from "../lib/cdk-pipeline-stack";
 import { CdkFargateDockerEcsAlb } from "../lib/cdk-fargate-docker-ecs-alb";
+import { CdkFirstS3stack } from "../lib/cdk-first-s3-stack";
+import { CdkApiGatewayStack } from "../lib/cdk-api-gateway-stack";
 
 const app = new cdk.App();
-new CdkAppStack(app, "CdkAppStack");
+new CdkApiGatewayStack(app, "CdkApiGatewayStack");
 new CdkAppWebsiteS3Stack(app, "CdkAppWebsiteS3Stack");
 
 const websiteStack = new CdkCrossStackReferenceS3(
@@ -55,7 +57,7 @@ new CdkVpcEc2BastionStack(app, "CdkVpcEc2BastionStack");
 
 // developer-group's users have full access to S3
 
-// Tester group users can only list buckets but not red contents inside buckets..
+// Tester group users can only list buckets but not read contents inside buckets..
 new CdkIAMgroupPolicyAccessS3(app, "CdkIAMgroupPolicyAccessS3");
 
 // CDK pipeline stack
@@ -77,3 +79,6 @@ new CdkPipelineStack(app, "CdkPipelineStack");
 //node server.js
 //Server running on port 3000
 new CdkFargateDockerEcsAlb(app, "CdkFargateDockerEcsAlb");
+
+//
+new CdkFirstS3stack(app, "CdkFirstS3stack");

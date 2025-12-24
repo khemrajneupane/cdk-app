@@ -7,9 +7,7 @@ export class CdkIAMgroupPolicyAccessS3 extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    //
-    // 0. Two S3 Buckets
-    //
+    // Two S3 Buckets
     const readOnlyBucket = new s3.Bucket(this, "ReadOnlyBucket", {
       bucketName: "my-readonly-bucket-example-khem",
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -22,47 +20,16 @@ export class CdkIAMgroupPolicyAccessS3 extends cdk.Stack {
       autoDeleteObjects: true,
     });
 
-    //
-    // 1. IAM Groups
-    //
+    // Two IAM Groups
     const developerGroup = new iam.Group(this, "DeveloperGroup", {
       groupName: "developer-group",
     });
 
-    const testerGroup = new iam.Group(this, "TesterGroup", {
-      groupName: "tester-group",
+    const visitorGroup = new iam.Group(this, "VisitorGroup", {
+      groupName: "visitor-group",
     });
 
-    //
-    // 2. Policy for Tester: Can see bucket names but NOT contents
-    //
-    const testerBucketViewPolicy = new iam.ManagedPolicy(
-      this,
-      "TesterBucketViewPolicy",
-      {
-        managedPolicyName: "TesterBucketViewPolicy",
-        statements: [
-          // Can list ALL buckets in account (see bucket names only)
-          new iam.PolicyStatement({
-            actions: ["s3:ListAllMyBuckets"],
-            resources: ["*"], // Required to be "*" for ListAllMyBuckets
-          }),
-
-          // Remove this if you don't want tester to see bucket contents list
-          /* new iam.PolicyStatement({
-            actions: ["s3:ListBucket"],
-            resources: [
-              readOnlyBucket.bucketArn,
-              fullAccessBucket.bucketArn
-            ],
-          }),*/
-        ],
-      }
-    );
-
-    //
     // 3. Policy for Developer: FULL ACCESS to both buckets
-    //
     const developerFullAccessPolicy = new iam.ManagedPolicy(
       this,
       "DeveloperFullAccessPolicy",
@@ -71,23 +38,12 @@ export class CdkIAMgroupPolicyAccessS3 extends cdk.Stack {
         statements: [
           // List permissions for both buckets
           new iam.PolicyStatement({
-            actions: ["s3:ListBucket"],
+            actions: ["s3:ListBucket"], // bucket-level not AWS Account level so just these 2 buckets but not other buckets if exist
             resources: [readOnlyBucket.bucketArn, fullAccessBucket.bucketArn],
           }),
-          // Full object access for both buckets
+          // Full object access for these 2 buckets
           new iam.PolicyStatement({
-            actions: [
-              "s3:GetObject",
-              "s3:PutObject",
-              "s3:DeleteObject",
-              "s3:GetObjectVersion",
-              "s3:DeleteObjectVersion",
-              "s3:PutObjectAcl",
-              "s3:GetObjectAcl",
-              "s3:PutObjectTagging",
-              "s3:GetObjectTagging",
-              "s3:DeleteObjectTagging",
-            ],
+            actions: ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
             resources: [
               `${readOnlyBucket.bucketArn}/*`,
               `${fullAccessBucket.bucketArn}/*`,
@@ -101,11 +57,30 @@ export class CdkIAMgroupPolicyAccessS3 extends cdk.Stack {
         ],
       }
     );
+    //
+    // Let's create Policy for Visitor: Can see bucket names but NOT contents
+    //
+    const visitorBucketViewPolicy = new iam.ManagedPolicy(
+      this,
+      "VisitorBucketViewPolicy",
+      {
+        managedPolicyName: "VisitorBucketViewPolicy",
+        statements: [
+          // Can list ALL buckets in account (see bucket names only)
+          new iam.PolicyStatement({
+            actions: ["s3:ListAllMyBuckets"], // AWS Account level so all buckets
+            resources: ["*"], // Required to be "*" for ListAllMyBuckets
+          }),
+        ],
+      }
+    );
+
+    //
 
     //
     // Attach policies to groups
     //
-    testerGroup.addManagedPolicy(testerBucketViewPolicy);
+    visitorGroup.addManagedPolicy(visitorBucketViewPolicy);
     developerGroup.addManagedPolicy(developerFullAccessPolicy);
 
     //
@@ -117,9 +92,9 @@ export class CdkIAMgroupPolicyAccessS3 extends cdk.Stack {
       passwordResetRequired: false,
     });
 
-    const testerUser = new iam.User(this, "TesterUser", {
-      userName: "tester-user",
-      password: cdk.SecretValue.unsafePlainText("TestUser#1234"),
+    const visitorUser = new iam.User(this, "VisitorUser", {
+      userName: "visitor-user",
+      password: cdk.SecretValue.unsafePlainText("VisitorUser#1234"),
       passwordResetRequired: false,
     });
 
@@ -127,11 +102,8 @@ export class CdkIAMgroupPolicyAccessS3 extends cdk.Stack {
     // 5. Assign Users to Groups
     //
     developerUser.addToGroup(developerGroup);
-    testerUser.addToGroup(testerGroup);
+    visitorUser.addToGroup(visitorGroup);
 
-    //
-    // 6. Access Keys and Outputs (keep as is)
-    //
     const developerAccessKey = new iam.CfnAccessKey(
       this,
       "DeveloperAccessKey",
@@ -140,8 +112,8 @@ export class CdkIAMgroupPolicyAccessS3 extends cdk.Stack {
       }
     );
 
-    const testerAccessKey = new iam.CfnAccessKey(this, "TesterAccessKey", {
-      userName: testerUser.userName,
+    const visitorAccessKey = new iam.CfnAccessKey(this, "VisitorAccessKey", {
+      userName: visitorUser.userName,
     });
 
     new cdk.CfnOutput(this, "DeveloperAccessKeyId", {
@@ -152,12 +124,12 @@ export class CdkIAMgroupPolicyAccessS3 extends cdk.Stack {
       value: developerAccessKey.attrSecretAccessKey,
     });
 
-    new cdk.CfnOutput(this, "TesterAccessKeyId", {
-      value: testerAccessKey.ref,
+    new cdk.CfnOutput(this, "VisitorAccessKeyId", {
+      value: visitorAccessKey.ref,
     });
 
-    new cdk.CfnOutput(this, "TesterSecretAccessKey", {
-      value: testerAccessKey.attrSecretAccessKey,
+    new cdk.CfnOutput(this, "VisitorSecretAccessKey", {
+      value: visitorAccessKey.attrSecretAccessKey,
     });
   }
 }
