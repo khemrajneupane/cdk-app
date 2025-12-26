@@ -17,31 +17,31 @@ import { CdkFirstS3stack } from "../lib/cdk-first-s3-stack";
 import { CdkApiGatewayStack } from "../lib/cdk-api-gateway-stack";
 
 const app = new cdk.App();
-new CdkApiGatewayStack(app, "CdkApiGatewayStack");
-new CdkAppWebsiteS3Stack(app, "CdkAppWebsiteS3Stack");
+//new CdkApiGatewayStack(app, "CdkApiGatewayStack");
+//new CdkAppWebsiteS3Stack(app, "CdkAppWebsiteS3Stack");
 
-const websiteStack = new CdkCrossStackReferenceS3(
-  app,
-  "CdkCrossStackReferenceS3"
-);
+// const websiteStack = new CdkCrossStackReferenceS3(
+//   app,
+//   "CdkCrossStackReferenceS3"
+// );
 
 // 2️⃣ Lambda stack that writes to S3
-new CdkCrossStackLambda(app, "CdkCrossStackLambda", {
-  targetBucket: websiteStack.websiteBucket,
-});
+// new CdkCrossStackLambda(app, "CdkCrossStackLambda", {
+//   targetBucket: websiteStack.websiteBucket,
+// });
 // lambda stack that is triggered by s3 event.
 new S3TriggerStack(app, "S3TriggerStack");
 // API CRUD stack...
-new CDKApiStack(app, "CDKApiStack");
+//new CDKApiStack(app, "CDKApiStack");
 // sqs fanout stack to demonstrate sqs with lambda
-new CdkSqsFanoutStack(app, "CdkSqsFanoutStack");
+//new CdkSqsFanoutStack(app, "CdkSqsFanoutStack");
 
 //orchestration with step functions
 // AWS Console → Step Functions → MyStateMachine → Start Execution
-new CdkStepFunctionStack(app, "CdkStepFunctionStack");
+//new CdkStepFunctionStack(app, "CdkStepFunctionStack");
 
 // Production-style microservice stack with step functions, api gateway, dynamodb, sns, sqs, etc.
-new CdkStepFnRestApiDynamoStack(app, "CdkStepFnRestApiDynamoStack");
+//new CdkStepFnRestApiDynamoStack(app, "CdkStepFnRestApiDynamoStack");
 
 // VPC with EC2 Bastian Host complete infrastructure design.
 // first ssh into bastian host ( public subnet ec2 instance) like so:
@@ -53,15 +53,15 @@ new CdkStepFnRestApiDynamoStack(app, "CdkStepFnRestApiDynamoStack");
 // then do chomod 400 bastian-key-pari
 // then ssh -i "bastian-key-pari" ec2-user@<private-ec2-instance-private-ip>
 
-new CdkVpcEc2BastionStack(app, "CdkVpcEc2BastionStack");
+//new CdkVpcEc2BastionStack(app, "CdkVpcEc2BastionStack");
 
 // developer-group's users have full access to S3
 
 // Tester group users can only list buckets but not read contents inside buckets..
-new CdkIAMgroupPolicyAccessS3(app, "CdkIAMgroupPolicyAccessS3");
+//new CdkIAMgroupPolicyAccessS3(app, "CdkIAMgroupPolicyAccessS3");
 
 // CDK pipeline stack
-new CdkPipelineStack(app, "CdkPipelineStack");
+//new CdkPipelineStack(app, "CdkPipelineStack");
 
 //Deploys a simple “Hello World” Node.js web application using a Docker image to
 // AWS ECS Fargate. The stack is optimized for cost with no NAT gateways
@@ -78,7 +78,7 @@ new CdkPipelineStack(app, "CdkPipelineStack");
 // docker-for-ecs-tasks@1.0.0 start
 //node server.js
 //Server running on port 3000
-new CdkFargateDockerEcsAlb(app, "CdkFargateDockerEcsAlb");
+//new CdkFargateDockerEcsAlb(app, "CdkFargateDockerEcsAlb");
 
 //
-new CdkFirstS3stack(app, "CdkFirstS3stack");
+//new CdkFirstS3stack(app, "CdkFirstS3stack");

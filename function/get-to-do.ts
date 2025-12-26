@@ -6,6 +6,11 @@ const client = new DynamoDBClient({});
 const dynamo = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = process.env.MY_TABLE!;
 
+const myname = "khem";
+if (dynamo) {
+  console.log("what");
+}
+
 export async function getToDo(
   event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyResultV2> {
